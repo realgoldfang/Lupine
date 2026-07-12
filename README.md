@@ -7,6 +7,14 @@ Built with Electron + React + TypeScript.
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
+> **Warning: macOS Users**
+> The `.dmg` release is **unsigned** (no Apple Developer certificate). macOS will block it by default. To open:
+> 1. Download the `.dmg`
+> 2. **Right-click** (or Control-click) the file and select **Open**
+> 3. Click **Open** in the dialog
+>
+> Or go to **System Settings > Privacy & Security** and click **Open Anyway**.
+
 ## Features
 
 ### Podcasting 2.0 Support
@@ -40,16 +48,6 @@ Built with Electron + React + TypeScript.
 ### Download
 
 Grab the latest release for your platform from [Releases](https://github.com/realgoldfang/Lupine/releases).
-
-### macOS Gatekeeper Warning
-
-The macOS `.dmg` is **unsigned** (no Apple Developer certificate). macOS will block it by default. To open:
-
-1. Download the `.dmg`
-2. Right-click (or Control-click) the `.dmg` file and select **Open**
-3. Click **Open** in the dialog
-
-Or go to **System Settings > Privacy & Security** and click **Open Anyway** next to the blocked message.
 
 ### Build from Source
 
