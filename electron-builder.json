@@ -1,7 +1,12 @@
 {
   "appId": "dev.cybernate.lupine",
-  "productName": "Podcast 2.0",
+  "productName": "Lupine",
   "copyright": "Copyright © 2026 Nathan Stallings",
+  "publish": {
+    "provider": "github",
+    "owner": "cybernate",
+    "repo": "lupine"
+  },
   "directories": {
     "output": "release"
   },
@@ -54,7 +59,7 @@
     "target": ["AppImage", "deb", "rpm", "snap", "flatpak"],
     "icon": "public/icon.png",
     "category": "Audio",
-    "synopsis": "Podcast 2.0 Desktop Player",
+    "synopsis": "Lupine - Podcast 2.0 Desktop Player",
     "description": "Full-featured podcast player with Podcast 2.0 namespace support including chapters, transcripts, and Value for Value.",
     "maintainer": "Nathan Stallings"
   },
@@ -67,7 +72,7 @@
   "snap": {
     "grade": "stable",
     "confinement": "strict",
-    "summary": "Podcast 2.0 Desktop Player",
+    "summary": "Lupine - Podcast 2.0 Desktop Player",
     "plugs": [
       "default",
       "audio-playback",
