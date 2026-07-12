@@ -4,8 +4,8 @@
   "copyright": "Copyright © 2026 Nathan Stallings",
   "publish": {
     "provider": "github",
-    "owner": "cybernate",
-    "repo": "lupine"
+    "owner": "realgoldfang",
+    "repo": "Lupine"
   },
   "directories": {
     "output": "release"
@@ -15,7 +15,7 @@
     "dist-electron/**/*"
   ],
   "win": {
-    "target": ["nsis", "appx", "portable"],
+    "target": ["nsis", "portable"],
     "icon": "public/icon.ico",
     "publisherName": "Nathan Stallings"
   },
@@ -27,33 +27,6 @@
     "createStartMenuShortcut": true,
     "installerIcon": "public/icon.ico",
     "uninstallerIcon": "public/icon.ico"
-  },
-  "appx": {
-    "applicationId": "Podcast2Desktop",
-    "publisher": "CN=Nathan Stallings",
-    "publisherDisplayName": "Nathan Stallings",
-    "identityName": "Podcast2Desktop",
-    "languages": ["en-US"],
-    "setBuildNumber": true
-  },
-  "mac": {
-    "target": ["dmg", "pkg"],
-    "icon": "public/icon.icns",
-    "category": "public.app-category.entertainment",
-    "hardenedRuntime": true,
-    "gatekeeperAssess": false,
-    "entitlements": "entitlements.mac.plist",
-    "entitlementsInherit": "entitlements.mac.plist"
-  },
-  "dmg": {
-    "contents": [
-      { "x": 130, "y": 220 },
-      { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
-    ]
-  },
-  "pkg": {
-    "isRelocatable": false,
-    "isVersionChecked": true
   },
   "linux": {
     "target": ["AppImage", "deb", "rpm", "snap", "flatpak"],

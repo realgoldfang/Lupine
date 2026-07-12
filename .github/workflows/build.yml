@@ -1,4 +1,4 @@
-name: Build & Release
+name: Build
 
 on:
   push:
@@ -13,7 +13,11 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            build_cmd: npm run build:linux
+          - os: windows-latest
+            build_cmd: npm run build:win
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -29,19 +33,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build & Publish
-        uses: electron-userland/electron-builder-action@v2
+      - name: Compile Electron main process
+        run: npx tsc -p tsconfig.electron.json
+
+      - name: Build
+        run: ${{ matrix.build_cmd }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # macOS
-          mac_certs: ${{ secrets.MAC_CERTS }}
-          mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
-          # Windows
-          windows_certs: ${{ secrets.WINDOWS_CERTS }}
-          windows_certs_password: ${{ secrets.WINDOWS_CERTS_PASSWORD }}
-        env:
-          CSC_LINK: ${{ matrix.os == 'macos-latest' && secrets.MAC_CERTS || '' }}
-          CSC_KEY_PASSWORD: ${{ matrix.os == 'macos-latest' && secrets.MAC_CERTS_PASSWORD || '' }}
+          name: release-${{ matrix.os }}
+          path: release/**/*
+          retention-days: 5
 
   release:
     needs: build
@@ -49,16 +52,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: release
           merge-multiple: true
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/**/*
           generate_release_notes: true
-          draft: false
-          prerelease: false
