@@ -68,6 +68,7 @@ jobs:
         run: |
           cd release
           rm -rf *-unpacked mac-* win-* *.yml builder-debug.yml
+          find . -name "*.blockmap" -delete
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
