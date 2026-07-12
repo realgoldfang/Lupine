@@ -2,6 +2,10 @@ import { app, BrowserWindow, ipcMain, protocol, globalShortcut, Tray, Menu, nati
 import path from 'path';
 import { parsePodcastFeed } from './parser';
 
+if (process.platform === 'linux' && process.env.WAYLAND_DISPLAY && !process.env.LUPINE_NO_OZONE) {
+  app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+}
+
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
@@ -69,17 +73,32 @@ function registerMediaKeys() {
 }
 
 function setupAutoUpdate() {
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      const { autoUpdater } = require('electron-updater');
-      autoUpdater.checkForUpdatesAndNotify();
-      autoUpdater.on('update-available', () => {
-        mainWindow?.webContents.send('update-available');
-      });
-      autoUpdater.on('update-downloaded', () => {
-        mainWindow?.webContents.send('update-downloaded');
-      });
-    } catch {}
+  if (process.env.VITE_DEV_SERVER_URL) return;
+  try {
+    const { autoUpdater } = require('electron-updater');
+    autoUpdater.autoDownload = false;
+    autoUpdater.logger = {
+      info: (msg: string) => console.log('[updater]', msg),
+      warn: (msg: string) => console.warn('[updater]', msg),
+      error: (msg: string) => console.error('[updater]', msg),
+    };
+
+    autoUpdater.on('update-available', (info: any) => {
+      mainWindow?.webContents.send('update-available', info);
+      autoUpdater.downloadUpdate();
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+      mainWindow?.webContents.send('update-downloaded');
+    });
+
+    autoUpdater.on('error', (err: Error) => {
+      console.error('[updater] error:', err.message);
+    });
+
+    autoUpdater.checkForUpdates().catch(() => {});
+  } catch (err) {
+    console.error('[updater] init failed:', err);
   }
 }
 

@@ -18,6 +18,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMediaPlayPause: (callback: () => void) => ipcRenderer.on('media-play-pause', callback),
   onMediaNext: (callback: () => void) => ipcRenderer.on('media-next', callback),
   onMediaPrevious: (callback: () => void) => ipcRenderer.on('media-previous', callback),
-  onUpdateAvailable: (callback: () => void) => ipcRenderer.on('update-available', callback),
+  onUpdateAvailable: (callback: (info: any) => void) => ipcRenderer.on('update-available', (_event, info) => callback(info)),
   onUpdateDownloaded: (callback: () => void) => ipcRenderer.on('update-downloaded', callback),
 });

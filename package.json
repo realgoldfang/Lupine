@@ -1,6 +1,6 @@
 {
   "name": "lupine",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Podcast 2.0 Desktop Application - Full PC20 namespace support",
   "author": "Nathan Stallings",
   "license": "MIT",
@@ -22,6 +22,7 @@
     "build:all": "vite build && electron-builder -wml --publish never --config electron-builder.json"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "fast-xml-parser": "^4.5.0",
     "node-fetch": "^3.3.2",
     "react": "^18.3.1",

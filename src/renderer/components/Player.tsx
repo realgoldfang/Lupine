@@ -19,6 +19,7 @@ interface PlayerProps {
   onShowTranscript: () => void;
   onShowValue: () => void;
   updateAvailable?: boolean;
+  updateDownloaded?: boolean;
   onInstallUpdate?: () => void;
   sleepTimer: {
     remaining: number;
@@ -46,6 +47,7 @@ export function Player({
   onShowTranscript,
   onShowValue,
   updateAvailable,
+  updateDownloaded,
   onInstallUpdate,
   sleepTimer,
   onShowAbout,
@@ -78,10 +80,15 @@ export function Player({
 
   return (
     <footer className="player">
-      {updateAvailable && (
+      {updateAvailable && !updateDownloaded && (
         <div className="update-banner">
-          <span>🔄 Update available!</span>
-          <button onClick={onInstallUpdate}>Install Now</button>
+          <span>🔄 Update downloading...</span>
+        </div>
+      )}
+      {updateDownloaded && (
+        <div className="update-banner">
+          <span>✅ Update ready to install</span>
+          <button onClick={onInstallUpdate}>Restart & Install</button>
         </div>
       )}
       <div className="player-info">

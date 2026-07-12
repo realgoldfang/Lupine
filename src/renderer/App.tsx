@@ -46,6 +46,7 @@ function AppInner() {
   const [history, setHistory] = useState(loadState().history);
   const [episodeStates, setEpisodeStates] = useState(loadState().episodes);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateDownloaded, setUpdateDownloaded] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const episodeListRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +65,7 @@ function AppInner() {
     window.electronAPI?.onMediaNext(() => player.playNext());
     window.electronAPI?.onMediaPrevious(() => {});
     window.electronAPI?.onUpdateAvailable(() => setUpdateAvailable(true));
-    window.electronAPI?.onUpdateDownloaded(() => {});
+    window.electronAPI?.onUpdateDownloaded(() => { setUpdateAvailable(false); setUpdateDownloaded(true); });
   }, [player]);
 
   // Keyboard shortcuts
@@ -390,6 +391,7 @@ function AppInner() {
         onShowTranscript={() => setShowTranscript(!showTranscript)}
         onShowValue={() => setShowValue(!showValue)}
         updateAvailable={updateAvailable}
+        updateDownloaded={updateDownloaded}
         onInstallUpdate={() => window.electronAPI?.installUpdate()}
         sleepTimer={sleepTimer}
         onShowAbout={() => setShowAbout(true)}
