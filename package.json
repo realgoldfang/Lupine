@@ -1,11 +1,10 @@
 {
   "name": "lupine",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Podcast 2.0 Desktop Application - Full PC20 namespace support",
   "author": "Nathan Stallings",
   "license": "MIT",
   "homepage": "https://www.cybernate.dev/products/lupine",
-  "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
