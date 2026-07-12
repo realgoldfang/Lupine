@@ -45,7 +45,8 @@
     "category": "Audio",
     "synopsis": "Lupine - Podcast 2.0 Desktop Player",
     "description": "Full-featured podcast player with Podcast 2.0 namespace support including chapters, transcripts, and Value for Value.",
-    "maintainer": "Nathan Stallings"
+    "maintainer": "Nathan Stallings",
+    "executableArgs": ["--no-sandbox"]
   },
   "deb": {
     "maintainer": "Nathan Stallings"
