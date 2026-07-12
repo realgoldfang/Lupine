@@ -2,11 +2,6 @@
   "appId": "dev.cybernate.lupine",
   "productName": "Lupine",
   "copyright": "Copyright © 2026 Nathan Stallings",
-  "publish": {
-    "provider": "github",
-    "owner": "realgoldfang",
-    "repo": "Lupine"
-  },
   "directories": {
     "output": "release"
   },
