@@ -1,0 +1,61 @@
+{
+  "name": "lupine",
+  "version": "1.0.0",
+  "description": "Podcast 2.0 Desktop Application - Full PC20 namespace support",
+  "author": "Nathan Stallings",
+  "license": "MIT",
+  "homepage": "https://www.cybernate.dev/products/lupine",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && electron-builder",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder --config electron-builder.json",
+    "build:win": "vite build && electron-builder --win nsis --config electron-builder.json",
+    "build:win:appx": "vite build && electron-builder --win appx --config electron-builder.json",
+    "build:win:portable": "vite build && electron-builder --win portable --config electron-builder.json",
+    "build:mac": "vite build && electron-builder --mac dmg --config electron-builder.json",
+    "build:mac:pkg": "vite build && electron-builder --mac pkg --config electron-builder.json",
+    "build:linux": "vite build && electron-builder --linux --config electron-builder.json",
+    "build:snap": "vite build && electron-builder --linux snap --config electron-builder.json",
+    "build:flatpak": "vite build && electron-builder --linux flatpak --config electron-builder.json",
+    "build:appimage": "vite build && electron-builder --linux AppImage --config electron-builder.json",
+    "build:deb": "vite build && electron-builder --linux deb --config electron-builder.json",
+    "build:all": "vite build && electron-builder -wml --config electron-builder.json"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-icon-maker": "^0.0.5",
+    "postcss": "^8.4.49",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.podcast2.desktop",
+    "productName": "Podcast 2.0",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "appId": "dev.cybernate.lupine",
+  "productName": "Podcast 2.0",
+  "copyright": "Copyright © 2026 Nathan Stallings",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "dist-electron/**/*"
+  ],
+  "win": {
+    "target": ["nsis", "appx", "portable"],
+    "icon": "public/icon.ico",
+    "publisherName": "Nathan Stallings"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "installerIcon": "public/icon.ico",
+    "uninstallerIcon": "public/icon.ico"
+  },
+  "appx": {
+    "applicationId": "Podcast2Desktop",
+    "publisher": "CN=Nathan Stallings",
+    "publisherDisplayName": "Nathan Stallings",
+    "identityName": "Podcast2Desktop",
+    "languages": ["en-US"],
+    "setBuildNumber": true
+  },
+  "mac": {
+    "target": ["dmg", "pkg"],
+    "icon": "public/icon.icns",
+    "category": "public.app-category.entertainment",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "entitlements.mac.plist",
+    "entitlementsInherit": "entitlements.mac.plist"
+  },
+  "dmg": {
+    "contents": [
+      { "x": 130, "y": 220 },
+      { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+    ]
+  },
+  "pkg": {
+    "isRelocatable": false,
+    "isVersionChecked": true
+  },
+  "linux": {
+    "target": ["AppImage", "deb", "rpm", "snap", "flatpak"],
+    "icon": "public/icon.png",
+    "category": "Audio",
+    "synopsis": "Podcast 2.0 Desktop Player",
+    "description": "Full-featured podcast player with Podcast 2.0 namespace support including chapters, transcripts, and Value for Value.",
+    "maintainer": "Nathan Stallings"
+  },
+  "deb": {
+    "maintainer": "Nathan Stallings"
+  },
+  "rpm": {
+    "vendor": "Nathan Stallings"
+  },
+  "snap": {
+    "grade": "stable",
+    "confinement": "strict",
+    "summary": "Podcast 2.0 Desktop Player",
+    "plugs": [
+      "default",
+      "audio-playback",
+      "network",
+      "network-bind",
+      "removable-media"
+    ]
+  },
+  "flatpak": {
+    "runtime": "org.freedesktop.Platform",
+    "runtimeVersion": "23.08",
+    "sdk": "org.freedesktop.Sdk",
+    "base": "org.electronjs.Electron2.BaseApp",
+    "baseVersion": "23.08",
+    "finishArgs": [
+      "--share=ipc",
+      "--socket=x11",
+      "--socket=pulseaudio",
+      "--share=network",
+      "--device=dri",
+      "--talk-name=org.freedesktop.secrets"
+    ]
+  }
+}
