@@ -31,22 +31,32 @@ Built with Electron + React + TypeScript.
 ### Cross-Platform
 | Format | Windows | macOS | Linux |
 |--------|---------|-------|-------|
-| Installer | `.exe` (NSIS) | `.dmg`, `.pkg` | `.deb`, `.rpm` |
+| Installer | `.exe` (NSIS) | `.dmg` | `.deb`, `.rpm` |
 | Portable | `.exe` (portable) | - | `AppImage` |
-| Store | `.appx` (Microsoft Store) | Mac App Store | Snap, Flatpak |
+| Package | - | - | Snap |
 
 ## Install
 
 ### Download
 
-Grab the latest release for your platform from [Releases](https://github.com/cybernate/lupine/releases).
+Grab the latest release for your platform from [Releases](https://github.com/realgoldfang/Lupine/releases).
+
+### macOS Gatekeeper Warning
+
+The macOS `.dmg` is **unsigned** (no Apple Developer certificate). macOS will block it by default. To open:
+
+1. Download the `.dmg`
+2. Right-click (or Control-click) the `.dmg` file and select **Open**
+3. Click **Open** in the dialog
+
+Or go to **System Settings > Privacy & Security** and click **Open Anyway** next to the blocked message.
 
 ### Build from Source
 
 ```bash
 # Clone
-git clone https://github.com/cybernate/lupine.git
-cd lupine
+git clone https://github.com/realgoldfang/Lupine.git
+cd Lupine
 
 # Install dependencies
 npm install
@@ -68,21 +78,17 @@ npm run build:all
 
 ```bash
 # Windows
-npm run build:win            # .exe installer
-npm run build:win:appx       # Microsoft Store
+npm run build:win            # .exe installer (NSIS)
 npm run build:win:portable   # Portable .exe
 
 # macOS
-npm run build:mac            # .dmg disk image
-npm run build:mac:pkg        # .pkg installer
+npm run build:mac            # .dmg disk image (unsigned)
 
 # Linux
 npm run build:linux          # All formats
 npm run build:appimage       # Portable AppImage
 npm run build:deb            # Debian/Ubuntu
-npm run build:rpm            # Red Hat/Fedora
 npm run build:snap           # Snap Store
-npm run build:flatpak        # Flatpak
 
 # All platforms
 npm run build:all
@@ -140,12 +146,26 @@ Lupine supports all formalized tags from the [podcast namespace](https://github.
 
 ## CI/CD
 
-GitHub Actions builds for all platforms automatically on tag push:
+GitHub Actions builds for all platforms and creates a GitHub Release automatically on tag push:
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+This triggers:
+1. **Build** - Linux (AppImage, deb, rpm, snap), Windows (NSIS, portable), macOS (.dmg) run in parallel
+2. **Release** - All artifacts are uploaded to a new GitHub Release with auto-generated notes
+
+Manual builds (via `workflow_dispatch`) produce artifacts but do not create a release.
+
+### Release Artifacts
+
+| Platform | Files |
+|----------|-------|
+| Windows | `Lupine Setup *.exe` (NSIS installer), `Lupine *.exe` (portable) |
+| macOS | `Lupine-*.dmg` (unsigned, see Gatekeeper note above) |
+| Linux | `Lupine-*.AppImage`, `lupine_*.deb`, `lupine-*.rpm`, `lupine_*.snap` |
 
 See [`.github/workflows/build.yml`](.github/workflows/build.yml) for configuration.
 
