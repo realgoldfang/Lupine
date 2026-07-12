@@ -8,9 +8,9 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && electron-builder",
+    "build": "vite build && electron-builder --config electron-builder.json",
     "preview": "vite preview",
-    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:dev": "npx tsc -p tsconfig.electron.json && concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --no-sandbox\"",
     "electron:build": "vite build && electron-builder --config electron-builder.json",
     "build:win": "vite build && electron-builder --win nsis --publish never --config electron-builder.json",
     "build:win:portable": "vite build && electron-builder --win portable --publish never --config electron-builder.json",
@@ -43,16 +43,5 @@
     "typescript": "^5.6.3",
     "vite": "^6.0.3",
     "wait-on": "^8.0.1"
-  },
-  "build": {
-    "appId": "com.podcast2.desktop",
-    "productName": "Podcast 2.0",
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*"
-    ],
-    "directories": {
-      "output": "release"
-    }
   }
 }

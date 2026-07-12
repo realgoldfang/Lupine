@@ -65,7 +65,9 @@ export function saveState(state: Partial<AppState>): void {
 }
 
 export function addFeed(state: AppState, feed: PodcastFeed): AppState {
-  const exists = state.feeds.some((f) => f.guid === feed.guid);
+  const exists = state.feeds.some((f) =>
+    (feed.guid && f.guid === feed.guid) || f.link === feed.link || f.title === feed.title
+  );
   if (exists) return state;
   return { ...state, feeds: [...state.feeds, feed] };
 }
@@ -192,7 +194,7 @@ ${items}
 
 export function parseOPML(xml: string): string[] {
   const urls: string[] = [];
-  const regex = /xmlUrl=["']([^"']+)["']/g;
+  const regex = /xml[Uu]rl=["']([^"']+)["']/gi;
   let match;
   while ((match = regex.exec(xml)) !== null) {
     urls.push(match[1]);
