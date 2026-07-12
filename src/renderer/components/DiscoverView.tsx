@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 
 interface DiscoverViewProps {
   onLoadFeed: (url: string) => void;
+  onImportOPML: () => void;
 }
 
 const SAMPLE_FEEDS = [
   { name: 'The Podcast Index', url: 'https://feeds.podcastindex.org/pc20.xml' },
-  { name: 'Podcasting 2.0 Example', url: 'https://example.com/feed.xml' },
   { name: 'This Week in Tech', url: 'https://feeds.twit.com/technewsweekly/video' },
   { name: 'The Daily', url: 'https://rss.art19.com/the-daily' },
   { name: 'Huberman Lab', url: 'https://www.rss.com/feeds/huberman-lab.xml' },
+  { name: 'Lex Fridman Podcast', url: 'https://lexfridman.com/feed/podcast/' },
 ];
 
-export function DiscoverView({ onLoadFeed }: DiscoverViewProps) {
+export function DiscoverView({ onLoadFeed, onImportOPML }: DiscoverViewProps) {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,11 +26,19 @@ export function DiscoverView({ onLoadFeed }: DiscoverViewProps) {
     try {
       await onLoadFeed(url.trim());
       setUrl('');
-    } catch (err) {
+    } catch {
       setError('Failed to load feed');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const match = text.match(/https?:\/\/[^\s]+/);
+      if (match) setUrl(match[0]);
+    } catch {}
   };
 
   return (
@@ -48,15 +57,24 @@ export function DiscoverView({ onLoadFeed }: DiscoverViewProps) {
           onChange={(e) => setUrl(e.target.value)}
           disabled={loading}
         />
+        <button type="button" className="discover-paste-btn" onClick={handlePaste}>
+          📋
+        </button>
         <button type="submit" className="discover-btn" disabled={loading || !url.trim()}>
           {loading ? 'Loading...' : 'Load Feed'}
         </button>
       </form>
 
+      <div className="discover-actions">
+        <button className="discover-import-btn" onClick={onImportOPML}>
+          📥 Import OPML
+        </button>
+      </div>
+
       {error && <div className="discover-error">{error}</div>}
 
       <div className="discover-samples">
-        <h3>Sample Feeds</h3>
+        <h3>Popular Feeds</h3>
         <div className="discover-sample-grid">
           {SAMPLE_FEEDS.map((feed, i) => (
             <button
@@ -74,38 +92,53 @@ export function DiscoverView({ onLoadFeed }: DiscoverViewProps) {
         </div>
       </div>
 
+      <div className="discover-keyboard-hints">
+        <h3>Keyboard Shortcuts</h3>
+        <div className="hints-grid">
+          <div className="hint"><kbd>Space</kbd> Play/Pause</div>
+          <div className="hint"><kbd>←</kbd><kbd>→</kbd> Seek 10s</div>
+          <div className="hint"><kbd>Shift</kbd>+<kbd>←</kbd><kbd>→</kbd> Seek 30s</div>
+          <div className="hint"><kbd>↑</kbd><kbd>↓</kbd> Volume</div>
+          <div className="hint"><kbd>&lt;</kbd><kbd>&gt;</kbd> Speed</div>
+          <div className="hint"><kbd>N</kbd> Next episode</div>
+          <div className="hint"><kbd>M</kbd> Mini player</div>
+          <div className="hint"><kbd>/</kbd> Search</div>
+          <div className="hint"><kbd>Esc</kbd> Close panel</div>
+        </div>
+      </div>
+
       <div className="discover-features">
         <h3>Podcast 2.0 Features</h3>
         <div className="feature-grid">
           <div className="feature-card">
             <span className="feature-icon">📑</span>
             <h4>Chapters</h4>
-            <p>Navigate episodes with rich chapter markers</p>
+            <p>Navigate with rich chapter markers</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">📝</span>
             <h4>Transcripts</h4>
-            <p>Read along with synchronized transcripts</p>
+            <p>Read along with synced transcripts</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">⚡</span>
             <h4>Value for Value</h4>
-            <p>Support creators with Lightning payments</p>
+            <p>Lightning payments to creators</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">🎵</span>
             <h4>Soundbites</h4>
-            <p>Discover highlight clips from episodes</p>
+            <p>Highlight clips from episodes</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">👥</span>
             <h4>People</h4>
-            <p>See hosts, guests, and contributors</p>
+            <p>See hosts, guests, credits</p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">🌍</span>
             <h4>Location</h4>
-            <p>Discover podcasts by geographic location</p>
+            <p>Discover by geography</p>
           </div>
         </div>
       </div>

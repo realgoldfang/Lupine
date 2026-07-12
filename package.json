@@ -14,13 +14,9 @@
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder --config electron-builder.json",
     "build:win": "vite build && electron-builder --win nsis --config electron-builder.json",
-    "build:win:appx": "vite build && electron-builder --win appx --config electron-builder.json",
     "build:win:portable": "vite build && electron-builder --win portable --config electron-builder.json",
-    "build:mac": "vite build && electron-builder --mac dmg --config electron-builder.json",
-    "build:mac:pkg": "vite build && electron-builder --mac pkg --config electron-builder.json",
     "build:linux": "vite build && electron-builder --linux --config electron-builder.json",
     "build:snap": "vite build && electron-builder --linux snap --config electron-builder.json",
-    "build:flatpak": "vite build && electron-builder --linux flatpak --config electron-builder.json",
     "build:appimage": "vite build && electron-builder --linux AppImage --config electron-builder.json",
     "build:deb": "vite build && electron-builder --linux deb --config electron-builder.json",
     "build:all": "vite build && electron-builder -wml --config electron-builder.json"

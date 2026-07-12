@@ -169,7 +169,21 @@ declare global {
       fetchFeed: (url: string) => Promise<{ success: boolean; data?: PodcastFeed; error?: string }>;
       fetchChapters: (url: string) => Promise<{ success: boolean; data?: { chapters: Chapter[] }; error?: string }>;
       fetchTranscript: (url: string) => Promise<{ success: boolean; data?: string; error?: string }>;
-      searchPodcasts: (query: string) => Promise<{ success: boolean; data?: string; error?: string }>;
+      downloadEpisode: (url: string, filename: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+      showSaveDialog: (options: any) => Promise<{ canceled: boolean; filePath?: string }>;
+      showOpenDialog: (options: any) => Promise<{ canceled: boolean; filePaths: string[] }>;
+      writeFile: (path: string, content: string) => Promise<void>;
+      readFile: (path: string) => Promise<string>;
+      minimizeWindow: () => Promise<void>;
+      maximizeWindow: () => Promise<void>;
+      closeWindow: () => Promise<void>;
+      setMiniPlayer: (mini: boolean) => Promise<void>;
+      installUpdate: () => Promise<void>;
+      onMediaPlayPause: (callback: () => void) => void;
+      onMediaNext: (callback: () => void) => void;
+      onMediaPrevious: (callback: () => void) => void;
+      onUpdateAvailable: (callback: () => void) => void;
+      onUpdateDownloaded: (callback: () => void) => void;
     };
   }
 }

@@ -29,7 +29,7 @@
     "uninstallerIcon": "public/icon.ico"
   },
   "linux": {
-    "target": ["AppImage", "deb", "rpm", "snap", "flatpak"],
+    "target": ["AppImage", "deb", "rpm", "snap"],
     "icon": "public/icon.png",
     "category": "Audio",
     "synopsis": "Lupine - Podcast 2.0 Desktop Player",
@@ -52,21 +52,6 @@
       "network",
       "network-bind",
       "removable-media"
-    ]
-  },
-  "flatpak": {
-    "runtime": "org.freedesktop.Platform",
-    "runtimeVersion": "23.08",
-    "sdk": "org.freedesktop.Sdk",
-    "base": "org.electronjs.Electron2.BaseApp",
-    "baseVersion": "23.08",
-    "finishArgs": [
-      "--share=ipc",
-      "--socket=x11",
-      "--socket=pulseaudio",
-      "--share=network",
-      "--device=dri",
-      "--talk-name=org.freedesktop.secrets"
     ]
   }
 }

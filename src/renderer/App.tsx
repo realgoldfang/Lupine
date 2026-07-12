@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { PodcastFeed, PodcastEpisode, Chapter, TranscriptCue } from './types';
 import { Sidebar } from './components/Sidebar';
 import { FeedView } from './components/FeedView';
@@ -7,33 +7,109 @@ import { ChapterPanel } from './components/ChapterPanel';
 import { TranscriptPanel } from './components/TranscriptPanel';
 import { DiscoverView } from './components/DiscoverView';
 import { ValuePanel } from './components/ValuePanel';
+import { SocialPanel } from './components/SocialPanel';
+import { MiniPlayer } from './components/MiniPlayer';
 import { usePlayer } from './hooks/usePlayer';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { ThemeProvider, useTheme } from './hooks/useTheme';
+import {
+  loadState, saveState, addFeed, markListened,
+  addToHistory, addToQueue,
+  removeFromQueue, exportOPML, parseOPML
+} from './store';
 import './styles/app.css';
 
 type View = 'discover' | 'feed' | 'episode';
 
-export default function App() {
+function AppInner() {
   const player = usePlayer();
+  const { theme, toggleTheme } = useTheme();
   const [view, setView] = useState<View>('discover');
-  const [feeds, setFeeds] = useState<PodcastFeed[]>([]);
+  const [feeds, setFeeds] = useState<PodcastFeed[]>(() => loadState().feeds);
   const [selectedFeed, setSelectedFeed] = useState<PodcastFeed | null>(null);
   const [selectedEpisode, setSelectedEpisode] = useState<PodcastEpisode | null>(null);
   const [showChapters, setShowChapters] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [showValue, setShowValue] = useState(false);
+  const [showSocial, setShowSocial] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showMiniPlayer, setShowMiniPlayer] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [transcript, setTranscript] = useState<TranscriptCue[]>([]);
-  const [feedUrl, setFeedUrl] = useState('');
+  const [queue, setQueue] = useState<string[]>(() => loadState().queue);
+  const [history, setHistory] = useState(loadState().history);
+  const [episodeStates, setEpisodeStates] = useState(loadState().episodes);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+
+  // Persist state
+  useEffect(() => {
+    saveState({ feeds, queue, history, episodes: episodeStates });
+  }, [feeds, queue, history, episodeStates]);
+
+  // Media key listeners
+  useEffect(() => {
+    window.electronAPI?.onMediaPlayPause(() => player.togglePlay());
+    window.electronAPI?.onMediaNext(() => player.playNext());
+    window.electronAPI?.onMediaPrevious(() => {});
+    window.electronAPI?.onUpdateAvailable(() => setUpdateAvailable(true));
+    window.electronAPI?.onUpdateDownloaded(() => {});
+  }, [player]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onPlayPause: player.togglePlay,
+    onSeekForward: (s) => player.seek(player.currentTime + s),
+    onSeekBackward: (s) => player.seek(Math.max(0, player.currentTime - s)),
+    onVolumeUp: () => player.setVolume(Math.min(1, player.volume + 0.1)),
+    onVolumeDown: () => player.setVolume(Math.max(0, player.volume - 0.1)),
+    onNextTrack: player.playNext,
+    onPrevTrack: () => {},
+    onSpeedUp: () => {
+      const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+      const idx = rates.indexOf(player.playbackRate);
+      if (idx < rates.length - 1) player.setPlaybackRate(rates[idx + 1]);
+    },
+    onSpeedDown: () => {
+      const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+      const idx = rates.indexOf(player.playbackRate);
+      if (idx > 0) player.setPlaybackRate(rates[idx - 1]);
+    },
+    onToggleMiniPlayer: () => {
+      setShowMiniPlayer(!showMiniPlayer);
+      window.electronAPI?.setMiniPlayer(!showMiniPlayer);
+    },
+    onToggleSearch: () => setShowSearch(!showSearch),
+    onEscape: () => {
+      setShowSearch(false);
+      setShowChapters(false);
+      setShowTranscript(false);
+      setShowValue(false);
+      setShowSocial(false);
+    },
+  });
+
+  // Track progress
+  useEffect(() => {
+    if (selectedEpisode && player.currentTime > 0) {
+      setEpisodeStates((prev) => ({
+        ...prev,
+        [selectedEpisode.guid || '']: {
+          ...prev[selectedEpisode.guid || ''],
+          guid: selectedEpisode.guid || '',
+          progress: player.currentTime,
+          duration: player.duration,
+          lastPlayed: Date.now(),
+        },
+      }));
+    }
+  }, [player.currentTime]);
 
   const loadFeed = useCallback(async (url: string) => {
-    setFeedUrl(url);
     const result = await window.electronAPI.fetchFeed(url);
     if (result.success && result.data) {
-      setFeeds((prev) => {
-        const exists = prev.some((f) => f.guid === result.data!.guid);
-        if (exists) return prev;
-        return [...prev, result.data!];
-      });
+      setFeeds((prev) => addFeed({ feeds: prev } as any, result.data!).feeds);
       setSelectedFeed(result.data!);
       setView('feed');
     }
@@ -44,6 +120,13 @@ export default function App() {
     setSelectedEpisode(episode);
     if (episode.chapters) loadChapters(episode.chapters.url);
     if (episode.transcripts.length > 0) loadTranscript(episode.transcripts[0].url);
+
+    setHistory((prev) => addToHistory({ history: prev } as any, {
+      episodeGuid: episode.guid || '',
+      feedGuid: feed?.guid || selectedFeed?.guid || '',
+      timestamp: Date.now(),
+      duration: episode.duration || 0,
+    }).history);
   }, [player, selectedFeed]);
 
   const loadChapters = useCallback(async (url: string) => {
@@ -56,12 +139,11 @@ export default function App() {
   const loadTranscript = useCallback(async (url: string) => {
     const result = await window.electronAPI.fetchTranscript(url);
     if (result.success && result.data) {
-      const cues = parseTranscript(result.data);
-      setTranscript(cues);
+      setTranscript(parseTranscriptData(result.data));
     }
   }, []);
 
-  const parseTranscript = (data: string): TranscriptCue[] => {
+  const parseTranscriptData = (data: string): TranscriptCue[] => {
     try {
       const json = JSON.parse(data);
       if (json.transcript) {
@@ -72,7 +154,6 @@ export default function App() {
         }));
       }
     } catch {
-      // Try WebVTT format
       const lines = data.split('\n');
       const cues: TranscriptCue[] = [];
       let i = 0;
@@ -103,8 +184,98 @@ export default function App() {
     return 0;
   };
 
+  const handleExportOPML = async () => {
+    const xml = exportOPML(feeds);
+    const result = await window.electronAPI.showSaveDialog({
+      defaultPath: 'lupine-subscriptions.opml',
+      filters: [{ name: 'OPML', extensions: ['opml', 'xml'] }],
+    });
+    if (!result.canceled && result.filePath) {
+      await window.electronAPI.writeFile(result.filePath, xml);
+    }
+  };
+
+  const handleImportOPML = async () => {
+    const result = await window.electronAPI.showOpenDialog({
+      filters: [{ name: 'OPML', extensions: ['opml', 'xml'] }],
+      properties: ['openFile'],
+    });
+    if (!result.canceled && result.filePaths[0]) {
+      const content = await window.electronAPI.readFile(result.filePaths[0]);
+      const urls = parseOPML(content);
+      for (const url of urls) {
+        await loadFeed(url);
+      }
+    }
+  };
+
+  const handleDownloadEpisode = async (episode: PodcastEpisode) => {
+    if (!episode.enclosure) return;
+    const filename = `${episode.title || 'episode'}.${episode.enclosure.type.split('/')[1] || 'mp3'}`;
+    await window.electronAPI.downloadEpisode(episode.enclosure.url, filename);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => setDragOver(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const text = e.dataTransfer.getData('text/plain');
+    const url = text.match(/https?:\/\/[^\s]+/)?.[0];
+    if (url) loadFeed(url);
+  };
+
+  const toggleListened = (guid: string) => {
+    setEpisodeStates((prev) => ({
+      ...prev,
+      [guid]: {
+        ...prev[guid],
+        guid,
+        listened: !prev[guid]?.listened,
+        lastPlayed: Date.now(),
+      },
+    }));
+  };
+
+  const filteredEpisodes = selectedFeed?.episodes.filter((ep) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      ep.title.toLowerCase().includes(q) ||
+      ep.description?.toLowerCase().includes(q) ||
+      ep.persons.some((p) => p.name.toLowerCase().includes(q))
+    );
+  }) || [];
+
+  if (showMiniPlayer) {
+    return (
+      <MiniPlayer
+        isPlaying={player.isPlaying}
+        currentTime={player.currentTime}
+        duration={player.duration}
+        currentEpisode={selectedEpisode}
+        onTogglePlay={player.togglePlay}
+        onSeek={player.seek}
+        onExpand={() => {
+          setShowMiniPlayer(false);
+          window.electronAPI?.setMiniPlayer(false);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="app">
+    <div
+      className={`app ${dragOver ? 'drag-over' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <Sidebar
         feeds={feeds}
         selectedFeed={selectedFeed}
@@ -113,14 +284,33 @@ export default function App() {
           setView('feed');
         }}
         onDiscover={() => setView('discover')}
+        onRemoveFeed={(guid) => setFeeds((prev) => prev.filter((f) => f.guid !== guid))}
+        onExportOPML={handleExportOPML}
+        onImportOPML={handleImportOPML}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        episodeStates={episodeStates}
       />
       <main className="main-content">
+        {showSearch && selectedFeed && (
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search episodes... (press / to toggle)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+            <button onClick={() => { setShowSearch(false); setSearchQuery(''); }}>×</button>
+          </div>
+        )}
         {view === 'discover' && (
-          <DiscoverView onLoadFeed={loadFeed} />
+          <DiscoverView onLoadFeed={loadFeed} onImportOPML={handleImportOPML} />
         )}
         {view === 'feed' && selectedFeed && (
           <FeedView
             feed={selectedFeed}
+            episodes={searchQuery ? filteredEpisodes : undefined}
             onPlayEpisode={(ep) => playEpisode(ep)}
             onSelectEpisode={(ep) => {
               setSelectedEpisode(ep);
@@ -128,11 +318,17 @@ export default function App() {
               setShowTranscript(ep.transcripts.length > 0);
               setShowValue(!!ep.value || !!selectedFeed.value);
             }}
-            onAddToQueue={player.addToQueue}
+            onAddToQueue={(ep) => setQueue((prev) => addToQueue({ queue: prev } as any, ep.guid || '').queue)}
+            onDownload={handleDownloadEpisode}
+            onToggleListened={toggleListened}
+            episodeStates={episodeStates}
+            podrollFeeds={selectedFeed.podroll}
+            onLoadFeed={loadFeed}
+            onShowSocial={(ep) => { setSelectedEpisode(ep); setShowSocial(true); }}
           />
         )}
       </main>
-      {(showChapters || showTranscript || showValue) && selectedEpisode && (
+      {(showChapters || showTranscript || showValue || showSocial) && selectedEpisode && (
         <aside className="side-panel">
           {showChapters && (
             <ChapterPanel
@@ -156,6 +352,12 @@ export default function App() {
               onClose={() => setShowValue(false)}
             />
           )}
+          {showSocial && (
+            <SocialPanel
+              socialInteracts={selectedEpisode.socialInteracts}
+              onClose={() => setShowSocial(false)}
+            />
+          )}
         </aside>
       )}
       <Player
@@ -174,7 +376,17 @@ export default function App() {
         onShowChapters={() => setShowChapters(!showChapters)}
         onShowTranscript={() => setShowTranscript(!showTranscript)}
         onShowValue={() => setShowValue(!showValue)}
+        updateAvailable={updateAvailable}
+        onInstallUpdate={() => window.electronAPI?.installUpdate()}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }

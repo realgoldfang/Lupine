@@ -17,6 +17,8 @@ interface PlayerProps {
   onShowChapters: () => void;
   onShowTranscript: () => void;
   onShowValue: () => void;
+  updateAvailable?: boolean;
+  onInstallUpdate?: () => void;
 }
 
 export function Player({
@@ -35,6 +37,8 @@ export function Player({
   onShowChapters,
   onShowTranscript,
   onShowValue,
+  updateAvailable,
+  onInstallUpdate,
 }: PlayerProps) {
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -63,6 +67,12 @@ export function Player({
 
   return (
     <footer className="player">
+      {updateAvailable && (
+        <div className="update-banner">
+          <span>🔄 Update available!</span>
+          <button onClick={onInstallUpdate}>Install Now</button>
+        </div>
+      )}
       <div className="player-info">
         {currentEpisode.image && (
           <img src={currentEpisode.image} alt="" className="player-image" />
@@ -95,17 +105,17 @@ export function Player({
       <div className="player-extra">
         <div className="player-feature-btns">
           {currentEpisode.chapters && (
-            <button className="player-feature-btn" onClick={onShowChapters} title="Chapters">
+            <button className="player-feature-btn" onClick={onShowChapters} title="Chapters (C)">
               📑
             </button>
           )}
           {currentEpisode.transcripts.length > 0 && (
-            <button className="player-feature-btn" onClick={onShowTranscript} title="Transcript">
+            <button className="player-feature-btn" onClick={onShowTranscript} title="Transcript (T)">
               📝
             </button>
           )}
           {(currentEpisode.value || currentFeed?.value) && (
-            <button className="player-feature-btn" onClick={onShowValue} title="Value">
+            <button className="player-feature-btn" onClick={onShowValue} title="Value for Value">
               ⚡
             </button>
           )}
