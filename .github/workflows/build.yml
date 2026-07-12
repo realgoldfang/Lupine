@@ -64,15 +64,13 @@ jobs:
           path: release
           merge-multiple: true
 
+      - name: Clean release artifacts
+        run: |
+          cd release
+          rm -rf *-unpacked mac-* win-* *.yml builder-debug.yml
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            release/*.exe
-            release/*.dmg
-            release/*.AppImage
-            release/*.deb
-            release/*.rpm
-            release/*.snap
-            release/*.blockmap
+          files: release/**/*
           generate_release_notes: true
