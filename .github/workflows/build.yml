@@ -16,8 +16,13 @@ jobs:
         include:
           - os: ubuntu-latest
             build_cmd: npm run build:linux
+            artifact: linux
           - os: windows-latest
             build_cmd: npm run build:win
+            artifact: windows
+          - os: ubuntu-latest
+            build_cmd: npm run build:mac
+            artifact: macos
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -36,13 +41,17 @@ jobs:
       - name: Compile Electron main process
         run: npx tsc -p tsconfig.electron.json
 
+      - name: Install Linux DMG tools (macOS build)
+        if: matrix.artifact == 'macos'
+        run: sudo apt-get install -y genisoimage
+
       - name: Build
         run: ${{ matrix.build_cmd }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.os }}
+          name: release-${{ matrix.artifact }}
           path: release/**/*
           retention-days: 5
 

@@ -19,6 +19,7 @@
     "build:snap": "vite build && electron-builder --linux snap --config electron-builder.json",
     "build:appimage": "vite build && electron-builder --linux AppImage --config electron-builder.json",
     "build:deb": "vite build && electron-builder --linux deb --config electron-builder.json",
+    "build:mac": "vite build && electron-builder --mac dmg --config electron-builder.json",
     "build:all": "vite build && electron-builder -wml --config electron-builder.json"
   },
   "dependencies": {

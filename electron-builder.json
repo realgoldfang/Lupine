@@ -23,6 +23,17 @@
     "installerIcon": "public/icon.ico",
     "uninstallerIcon": "public/icon.ico"
   },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "public/icon.icns",
+    "identity": null
+  },
+  "dmg": {
+    "contents": [
+      { "x": 130, "y": 220 },
+      { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+    ]
+  },
   "linux": {
     "target": ["AppImage", "deb", "rpm", "snap"],
     "icon": "public/icon.png",
