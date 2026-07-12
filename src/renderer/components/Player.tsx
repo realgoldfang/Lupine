@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PodcastEpisode, PodcastFeed } from '../types';
+import { SleepTimer } from './SleepTimer';
 
 interface PlayerProps {
   isPlaying: boolean;
@@ -19,6 +20,13 @@ interface PlayerProps {
   onShowValue: () => void;
   updateAvailable?: boolean;
   onInstallUpdate?: () => void;
+  sleepTimer: {
+    remaining: number;
+    formatRemaining: () => string;
+    setMinutes: (min: number | null) => void;
+    cancel: () => void;
+  };
+  onShowAbout: () => void;
 }
 
 export function Player({
@@ -39,6 +47,8 @@ export function Player({
   onShowValue,
   updateAvailable,
   onInstallUpdate,
+  sleepTimer,
+  onShowAbout,
 }: PlayerProps) {
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -60,6 +70,7 @@ export function Player({
       <footer className="player player-empty">
         <div className="player-content">
           <span className="player-no-episode">No episode selected</span>
+          <button className="player-about-btn" onClick={onShowAbout}>About</button>
         </div>
       </footer>
     );
@@ -103,14 +114,20 @@ export function Player({
       </div>
 
       <div className="player-extra">
+        <SleepTimer
+          remaining={sleepTimer.remaining}
+          formatRemaining={sleepTimer.formatRemaining}
+          onSetMinutes={sleepTimer.setMinutes}
+          onCancel={sleepTimer.cancel}
+        />
         <div className="player-feature-btns">
           {currentEpisode.chapters && (
-            <button className="player-feature-btn" onClick={onShowChapters} title="Chapters (C)">
+            <button className="player-feature-btn" onClick={onShowChapters} title="Chapters">
               📑
             </button>
           )}
           {currentEpisode.transcripts.length > 0 && (
-            <button className="player-feature-btn" onClick={onShowTranscript} title="Transcript (T)">
+            <button className="player-feature-btn" onClick={onShowTranscript} title="Transcript">
               📝
             </button>
           )}
@@ -143,6 +160,9 @@ export function Player({
           <option value="1.5">1.5x</option>
           <option value="2">2x</option>
         </select>
+        <button className="player-about-btn" onClick={onShowAbout} title="About Lupine">
+          ℹ
+        </button>
       </div>
     </footer>
   );

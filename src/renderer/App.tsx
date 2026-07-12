@@ -9,8 +9,11 @@ import { DiscoverView } from './components/DiscoverView';
 import { ValuePanel } from './components/ValuePanel';
 import { SocialPanel } from './components/SocialPanel';
 import { MiniPlayer } from './components/MiniPlayer';
+import { AboutDialog } from './components/AboutDialog';
+import { SleepTimer } from './components/SleepTimer';
 import { usePlayer } from './hooks/usePlayer';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useSleepTimer } from './hooks/useSleepTimer';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 import {
   loadState, saveState, addFeed, markListened,
@@ -34,7 +37,9 @@ function AppInner() {
   const [showSocial, setShowSocial] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterListened, setFilterListened] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [transcript, setTranscript] = useState<TranscriptCue[]>([]);
   const [queue, setQueue] = useState<string[]>(() => loadState().queue);
@@ -42,6 +47,11 @@ function AppInner() {
   const [episodeStates, setEpisodeStates] = useState(loadState().episodes);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const episodeListRef = useRef<HTMLDivElement>(null);
+
+  const sleepTimer = useSleepTimer(() => {
+    player.togglePlay();
+  });
 
   // Persist state
   useEffect(() => {
@@ -243,6 +253,7 @@ function AppInner() {
   };
 
   const filteredEpisodes = selectedFeed?.episodes.filter((ep) => {
+    if (filterListened && episodeStates[ep.guid || '']?.listened) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -310,7 +321,7 @@ function AppInner() {
         {view === 'feed' && selectedFeed && (
           <FeedView
             feed={selectedFeed}
-            episodes={searchQuery ? filteredEpisodes : undefined}
+            episodes={searchQuery || filterListened ? filteredEpisodes : undefined}
             onPlayEpisode={(ep) => playEpisode(ep)}
             onSelectEpisode={(ep) => {
               setSelectedEpisode(ep);
@@ -325,6 +336,8 @@ function AppInner() {
             podrollFeeds={selectedFeed.podroll}
             onLoadFeed={loadFeed}
             onShowSocial={(ep) => { setSelectedEpisode(ep); setShowSocial(true); }}
+            filterListened={filterListened}
+            onToggleFilter={() => setFilterListened(!filterListened)}
           />
         )}
       </main>
@@ -378,7 +391,10 @@ function AppInner() {
         onShowValue={() => setShowValue(!showValue)}
         updateAvailable={updateAvailable}
         onInstallUpdate={() => window.electronAPI?.installUpdate()}
+        sleepTimer={sleepTimer}
+        onShowAbout={() => setShowAbout(true)}
       />
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
     </div>
   );
 }

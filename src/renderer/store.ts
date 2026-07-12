@@ -20,6 +20,7 @@ export interface EpisodeState {
   progress: number;
   duration: number;
   lastPlayed: number;
+  playbackRate?: number;
 }
 
 export interface PlaybackHistoryEntry {
@@ -151,6 +152,24 @@ export function getEpisodeState(
 
 export function isListened(state: AppState, episodeGuid: string): boolean {
   return state.episodes[episodeGuid]?.listened || false;
+}
+
+export function savePlaybackSpeed(
+  state: AppState,
+  episodeGuid: string,
+  rate: number
+): AppState {
+  return {
+    ...state,
+    episodes: {
+      ...state.episodes,
+      [episodeGuid]: {
+        ...state.episodes[episodeGuid],
+        guid: episodeGuid,
+        playbackRate: rate,
+      },
+    },
+  };
 }
 
 export function exportOPML(feeds: PodcastFeed[]): string {

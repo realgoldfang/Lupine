@@ -14,6 +14,8 @@ interface FeedViewProps {
   podrollFeeds?: { feedGuid: string; feedUrl: string; title?: string }[];
   onLoadFeed: (url: string) => void;
   onShowSocial: (episode: PodcastEpisode) => void;
+  filterListened?: boolean;
+  onToggleFilter?: () => void;
 }
 
 export function FeedView({
@@ -28,6 +30,8 @@ export function FeedView({
   podrollFeeds,
   onLoadFeed,
   onShowSocial,
+  filterListened,
+  onToggleFilter,
 }: FeedViewProps) {
   const [showAllPersons, setShowAllPersons] = useState(false);
   const displayEpisodes = episodes || feed.episodes;
@@ -122,7 +126,17 @@ export function FeedView({
       )}
 
       <div className="episode-list">
-        <h2 className="episode-list-title">Episodes ({displayEpisodes.length})</h2>
+        <div className="episode-list-header">
+          <h2 className="episode-list-title">Episodes ({displayEpisodes.length})</h2>
+          {onToggleFilter && (
+            <button
+              className={`filter-btn ${filterListened ? 'active' : ''}`}
+              onClick={onToggleFilter}
+            >
+              {filterListened ? '✓ Hide listened' : '○ Show all'}
+            </button>
+          )}
+        </div>
         {displayEpisodes.map((episode, i) => {
           const state = episodeStates[episode.guid || ''];
           const isListened = state?.listened;
